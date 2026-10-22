@@ -12,46 +12,19 @@ import { ContactModal } from './components/ContactModal';
 import { LiveViewsTelemetryModal } from './components/LiveViewsTelemetryModal';
 import { Footer } from './components/Footer';
 import { Project } from './data/portfolioData';
+import { getAndIncrementRealViews } from './utils/telemetryTracker';
 
 export const App: React.FC = () => {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [contactModalOpen, setContactModalOpen] = useState(false);
   const [telemetryModalOpen, setTelemetryModalOpen] = useState(false);
 
-  // Initialize and persist realistic views counter
-  const [viewsCount, setViewsCount] = useState<number>(() => {
-    try {
-      const stored = localStorage.getItem('azad_portfolio_live_views');
-      if (stored) {
-        const next = parseInt(stored, 10) + 1;
-        localStorage.setItem('azad_portfolio_live_views', next.toString());
-        return next;
-      }
-    } catch {
-      // Fallback if localStorage restricted
-    }
-    const initial = 1482;
-    try {
-      localStorage.setItem('azad_portfolio_live_views', initial.toString());
-    } catch {}
-    return initial;
-  });
+  // Real view tracker — increments genuine session views on page visit
+  const [viewsCount, setViewsCount] = useState<number>(1);
 
-  // Subtle live view increment simulation over time
   useEffect(() => {
-    const interval = setInterval(() => {
-      // 30% chance every 45s to increment live views
-      if (Math.random() > 0.7) {
-        setViewsCount((prev) => {
-          const next = prev + 1;
-          try {
-            localStorage.setItem('azad_portfolio_live_views', next.toString());
-          } catch {}
-          return next;
-        });
-      }
-    }, 45000);
-    return () => clearInterval(interval);
+    const realViews = getAndIncrementRealViews();
+    setViewsCount(realViews);
   }, []);
 
   const handleExploreWork = () => {
