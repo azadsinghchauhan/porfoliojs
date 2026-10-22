@@ -1,0 +1,91 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    background-color: #F8F6F0;
+    color: #222823;
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    overflow-x: hidden;
+  }
+
+  /* Custom selection */
+  ::selection {
+    background: #C2A277;
+    color: #FFFFFF;
+  }
+}
+
+@layer utilities {
+  .font-serif-display {
+    font-family: 'Playfair Display', Georgia, serif;
+  }
+  
+  .font-serif-editorial {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+  }
+
+  .font-script-accent {
+    font-family: 'Caveat', 'Italianno', cursive;
+  }
+
+  /* Arch shape utility */
+  .arch-frame {
+    border-top-left-radius: 180px;
+    border-top-right-radius: 180px;
+  }
+
+  .arch-frame-sm {
+    border-top-left-radius: 110px;
+    border-top-right-radius: 110px;
+  }
+
+  .arch-frame-full {
+    border-radius: 180px 180px 0 0;
+  }
+
+  /* Subtle grain background effect */
+  .bg-subtle-noise {
+    background-image: radial-gradient(rgba(34, 40, 35, 0.04) 1px, transparent 0);
+    background-size: 24px 24px;
+  }
+
+  /* Editorial thin lines */
+  .border-editorial {
+    border-color: #DDD5C5;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #F4EFEB;
+}
+::-webkit-scrollbar-thumb {
+  background: #C2B7A3;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #9E917D;
+}
+
+/* Reduced motion accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
