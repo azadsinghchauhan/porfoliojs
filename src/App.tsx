@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
 import { EngineeringPillars } from './components/EngineeringPillars';
@@ -12,20 +12,48 @@ import { ContactModal } from './components/ContactModal';
 import { LiveViewsTelemetryModal } from './components/LiveViewsTelemetryModal';
 import { Footer } from './components/Footer';
 import { Project } from './data/portfolioData';
-import { getAndIncrementRealViews } from './utils/telemetryTracker';
+import { syncGlobalViews } from './utils/telemetryTracker';
 
 export const App: React.FC = () => {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [contactModalOpen, setContactModalOpen] = useState(false);
   const [telemetryModalOpen, setTelemetryModalOpen] = useState(false);
 
-  // Real view tracker — increments genuine session views on page visit
-  const [viewsCount, setViewsCount] = useState<number>(1);
+  // Global verified views count synced across phone, desktop and all visitors
+  const [viewsCount, setViewsCount] = useState<number>(() => {
+    try {
+      const cached = localStorage.getItem('azad_global_views_cached');
+      if (cached) return parseInt(cached, 10);
+    } catch {}
+    return 1;
+  });
 
-  useEffect(() => {
-    const realViews = getAndIncrementRealViews();
-    setViewsCount(realViews);
+  const refreshGlobalViews = useCallback(async (isInitialVisit = false) => {
+    const updated = await syncGlobalViews(isInitialVisit);
+    if (updated > 0) {
+      setViewsCount(updated);
+    }
   }, []);
+
+  // 1. Initial hit on page load
+  useEffect(() => {
+    refreshGlobalViews(true);
+  }, [refreshGlobalViews]);
+
+  // 2. Real-time background sync every 15s + on window focus (e.g. visiting from phone updates desktop)
+  useEffect(() => {
+    const handleFocus = () => refreshGlobalViews(false);
+    window.addEventListener('focus', handleFocus);
+
+    const interval = setInterval(() => {
+      refreshGlobalViews(false);
+    }, 15000);
+
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+      clearInterval(interval);
+    };
+  }, [refreshGlobalViews]);
 
   const handleExploreWork = () => {
     const workSection = document.getElementById('work');
@@ -40,7 +68,10 @@ export const App: React.FC = () => {
       <Navbar
         onOpenContact={() => setContactModalOpen(true)}
         viewsCount={viewsCount}
-        onOpenTelemetry={() => setTelemetryModalOpen(true)}
+        onOpenTelemetry={() => {
+          refreshGlobalViews(false);
+          setTelemetryModalOpen(true);
+        }}
       />
 
       {/* Main Content */}
